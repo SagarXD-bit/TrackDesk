@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+}
+
+enum TicketStatus {
+  RECEIVED
+  DIAGNOSING
+  WAITING_APPROVAL
+  WAITING_PARTS
+  REPAIR_IN_PROGRESS
+  QUALITY_CHECK
+  READY_FOR_PICKUP
+  DELIVERED
+  CANCELLED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  BANK_TRANSFER
+  OTHER
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String
+  password        String
+  role            UserRole @default(EMPLOYEE)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  assignedTickets Ticket[]      @relation("AssignedEmployee")
+  closedTickets   Ticket[]      @relation("ClosedBy")
+  notifications   Notification[]
+  uploads         Attachment[]
+
+  @@map("users")
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  address   String?
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tickets Ticket[]
+
+  @@map("customers")
+}
+
+model Ticket {
+  id               String        @id @default(cuid())
+  ticketNumber     String        @unique @map("ticket_number")
+  title            String
+  description      String?
+  category         String?
+  status           TicketStatus  @default(RECEIVED)
+  priority         Priority      @default(MEDIUM)
+  expectedDelivery DateTime?     @map("expected_delivery")
+  estimatedCost    Float?        @map("estimated_cost")
+  advancePaid      Float?        @default(0) @map("advance_paid")
+  remainingBalance Float?        @map("remaining_balance")
+  finalCost        Float?        @map("final_cost")
+  paymentStatus    PaymentStatus @default(UNPAID) @map("payment_status")
+  paymentMethod    PaymentMethod? @map("payment_method")
+  closedDate       DateTime?     @map("closed_date")
+  closedById       String?       @map("closed_by_id")
+  notes            String?
+  customerId       String        @map("customer_id")
+  assignedToId     String?       @map("assigned_to_id")
+  createdAt        DateTime      @default(now()) @map("created_at")
+  updatedAt        DateTime      @updatedAt @map("updated_at")
+
+  customer    Customer     @relation(fields: [customerId], references: [id])
+  assignedTo  User?        @relation("AssignedEmployee", fields: [assignedToId], references: [id])
+  closedBy    User?        @relation("ClosedBy", fields: [closedById], references: [id])
+  timeline    Timeline[]
+  attachments Attachment[]
+
+  @@index([customerId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([ticketNumber])
+  @@map("tickets")
+}
+
+model Timeline {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?
+  employeeId String?  @map("employee_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  ticketId  String   @map("ticket_id")
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+
+  @@index([ticketId])
+  @@map("timeline_entries")
+}
+
+model Attachment {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String   @map("original_name")
+  mimeType     String   @map("mime_type")
+  size         Int
+  url          String
+  createdAt    DateTime @default(now()) @map("created_at")
+  ticketId     String   @map("ticket_id")
+  uploadedById String?  @map("uploaded_by_id")
+
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+  uploadedBy User? @relation(fields: [uploadedById], references: [id])
+
+  @@index([ticketId])
+  @@map("attachments")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, read])
+  @@map("notifications")
+}

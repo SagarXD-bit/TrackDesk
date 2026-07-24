@@ -1,11 +1,12 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { Moon, Sun, Bell, Search } from "lucide-react";
+import { Moon, Sun, Bell, Search, Menu } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { useSidebar } from "./sidebar-context";
 
 interface Notification {
   id: string;
@@ -23,6 +24,7 @@ export function Navbar() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const notifRef = useRef<HTMLDivElement>(null);
+  const { openMobile } = useSidebar();
 
   useEffect(() => setMounted(true), []);
 
@@ -61,12 +63,19 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-[#D9D9D9] bg-white/90 px-4 sm:px-6 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-[#D9D9D9] bg-white/90 px-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
+      {/* Hamburger button — always visible below lg */}
+      <button onClick={openMobile}
+        className="flex lg:hidden rounded-xl p-2 text-[#666] hover:bg-gray-100 dark:hover:bg-gray-800">
+        <Menu className="h-5 w-5" />
+      </button>
+
       <div className="relative hidden sm:block flex-1 max-w-md">
         <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]" />
         <input type="text" placeholder="Search..."
           className="w-full rounded-2xl border-2 border-[#D9D9D9] bg-[#F5F5F5] py-2 pl-10 pr-4 text-sm text-[#191A23] transition-all duration-150 placeholder:text-[#999] focus:border-[#B9FF66] focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
       </div>
+
       <div className="flex items-center gap-2 ml-auto">
         {mounted && (
           <Button variant="ghost" size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>

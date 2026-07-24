@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, Ticket, Users, Settings, LogIn, ChevronLeft, X,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Logo } from "./logo";
+import { useSidebar } from "./sidebar-context";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -18,32 +19,32 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { mobileOpen, closeMobile, collapsed, toggleCollapsed } = useSidebar();
 
   useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+    closeMobile();
+  }, [pathname, closeMobile]);
 
   const sidebarContent = (
     <aside className={cn(
-      "flex h-screen flex-col bg-[#191A23] transition-all duration-200",
+      "flex h-full flex-col bg-[#191A23] transition-all duration-200",
       collapsed ? "w-16" : "w-64",
     )}>
-      <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-white/10 px-4">
         {!collapsed && (
           <Link href="/dashboard"><Logo /></Link>
         )}
-        <button onClick={() => setCollapsed(!collapsed)}
+        <button onClick={toggleCollapsed}
           className="hidden lg:flex rounded-xl p-1.5 text-white/50 hover:bg-white/10 hover:text-white">
           <ChevronLeft className={cn("h-5 w-5 transition-transform", collapsed && "rotate-180")} />
         </button>
-        <button onClick={() => setMobileOpen(false)}
+        <button onClick={closeMobile}
           className="flex lg:hidden rounded-xl p-1.5 text-white/50 hover:bg-white/10 hover:text-white">
           <X className="h-5 w-5" />
         </button>
       </div>
-      <nav className="flex-1 space-y-1 p-3">
+
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
@@ -58,7 +59,8 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="border-t border-white/10 p-3">
+
+      <div className="shrink-0 border-t border-white/10 p-3">
         <Link href="/login"
           className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium text-white/50 transition-all duration-150 hover:bg-white/10 hover:text-white">
           <LogIn className="h-5 w-5 shrink-0" />
@@ -70,24 +72,25 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Desktop: always visible */}
-      <div className="hidden lg:flex">{sidebarContent}</div>
+      {/* Desktop: permanently visible */}
+      <div className="hidden lg:flex h-screen shrink-0">
+        {sidebarContent}
+      </div>
 
-      {/* Mobile: drawer with backdrop */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 flex lg:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div className="relative animate-in slide-in-from-left">{sidebarContent}</div>
+      {/* Mobile/Tablet: slide-in drawer with backdrop */}
+      <div className={cn(
+        "fixed inset-0 z-50 lg:hidden transition-opacity duration-200",
+        mobileOpen ? "visible opacity-100" : "invisible opacity-0",
+      )}>
+        <div className="fixed inset-0 bg-black/50" onClick={closeMobile} />
+        <div className={cn(
+          "fixed left-0 top-0 h-full transition-transform duration-200",
+          collapsed ? "w-16" : "w-64",
+          mobileOpen ? "translate-x-0" : "-translate-x-full",
+        )}>
+          {sidebarContent}
         </div>
-      )}
-
-      {/* Mobile hamburger button */}
-      <button onClick={() => setMobileOpen(true)}
-        className="fixed bottom-4 left-4 z-40 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#B9FF66] text-[#191A23] shadow-lg lg:hidden">
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
+      </div>
     </>
   );
 }

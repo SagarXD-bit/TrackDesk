@@ -26,12 +26,8 @@ export default async function DashboardPage() {
       _sum: { finalCost: true },
     }),
     prisma.ticket.findMany({
-      orderBy: { updatedAt: "desc" },
-      take: 10,
-      include: {
-        customer: { select: { id: true, name: true, phone: true } },
-        assignedTo: { select: { id: true, name: true } },
-      },
+      orderBy: { updatedAt: "desc" }, take: 10,
+      include: { customer: { select: { id: true, name: true, phone: true } }, assignedTo: { select: { id: true, name: true } } },
     }),
     prisma.ticket.groupBy({ by: ["status"], _count: true }),
   ]);
@@ -43,32 +39,22 @@ export default async function DashboardPage() {
       const nextDay = new Date(day);
       nextDay.setDate(nextDay.getDate() + 1);
       return prisma.ticket.count({ where: { createdAt: { gte: day, lt: nextDay } } })
-        .then((count) => ({
-          name: day.toLocaleDateString("en", { weekday: "short" }),
-          tickets: count,
-        }));
+        .then((count) => ({ name: day.toLocaleDateString("en", { weekday: "short" }), tickets: count }));
     })
   );
 
   const stats = {
-    totalTickets,
-    openTickets,
-    readyForPickup,
-    deliveredTickets,
-    cancelledTickets,
-    monthlyRevenue: monthlyRevenue._sum.finalCost || 0,
-    todayTickets,
-    activeCustomers,
+    totalTickets, openTickets, readyForPickup, deliveredTickets, cancelledTickets,
+    monthlyRevenue: monthlyRevenue._sum.finalCost || 0, todayTickets, activeCustomers,
     recentTickets: JSON.parse(JSON.stringify(recentTickets)),
-    statusDistribution: JSON.parse(JSON.stringify(statusDistribution)),
-    weeklyData,
+    statusDistribution: JSON.parse(JSON.stringify(statusDistribution)), weeklyData,
   };
 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#191A23] dark:text-white">Dashboard</h1>
-        <p className="text-sm text-[#666] dark:text-gray-400">Real-time overview</p>
+        <h1 className="text-xl font-semibold text-white/90 tracking-tight">Dashboard</h1>
+        <p className="text-sm text-white/40">Real-time overview of your business</p>
       </div>
       <DashboardClient stats={stats} />
     </div>

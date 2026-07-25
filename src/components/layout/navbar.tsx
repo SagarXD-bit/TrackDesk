@@ -3,9 +3,10 @@
 import { useTheme } from "next-themes";
 import { Moon, Sun, Bell, Search, Menu } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
-import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
 
 interface Notification {
@@ -23,7 +24,9 @@ export function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [searchFocused, setSearchFocused] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
   const { openMobile } = useSidebar();
 
   useEffect(() => setMounted(true), []);
@@ -36,22 +39,28 @@ export function Navbar() {
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotifOpen(false);
-      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
   }, []);
 
   async function toggleNotifications() {
     if (!notifOpen) {
       const res = await fetch("/api/notifications");
       const d = await res.json();
-      if (d.data) {
-        setNotifications(d.data.notifications);
-        setUnreadCount(d.data.unreadCount);
-      }
+      if (d.data) { setNotifications(d.data.notifications); setUnreadCount(d.data.unreadCount); }
     }
     setNotifOpen(!notifOpen);
   }
@@ -63,63 +72,83 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 border-b border-[#D9D9D9] bg-white/90 px-4 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/90">
-      {/* Hamburger button — always visible below lg */}
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 px-4 border-b border-white/[0.04] bg-[#050505]/80 backdrop-blur-2xl">
       <button onClick={openMobile}
-        className="flex lg:hidden rounded-xl p-2 text-[#666] hover:bg-gray-100 dark:hover:bg-gray-800">
+        className="flex lg:hidden rounded-xl p-2 text-white/40 hover:text-white/70 hover:bg-white/5 transition-all">
         <Menu className="h-5 w-5" />
       </button>
 
-      <div className="relative hidden sm:block flex-1 max-w-md">
-        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#999]" />
-        <input type="text" placeholder="Search..."
-          className="w-full rounded-2xl border-2 border-[#D9D9D9] bg-[#F5F5F5] py-2 pl-10 pr-4 text-sm text-[#191A23] transition-all duration-150 placeholder:text-[#999] focus:border-[#B9FF66] focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100" />
+      <div className={cn(
+        "relative flex-1 max-w-md transition-all duration-300",
+        searchFocused ? "scale-[1.02]" : "scale-100"
+      )}>
+        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+        <input ref={searchRef} type="text" placeholder="Search..."
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
+          className={cn(
+            "w-full rounded-2xl py-2 pl-10 pr-14 text-sm text-white/70 placeholder:text-white/20 transition-all duration-300 outline-none",
+            "bg-white/[0.04] border border-white/[0.06]",
+            "focus:bg-white/[0.06] focus:border-white/[0.12] focus:text-white",
+          )} />
+        <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 rounded-lg bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-medium text-white/30">
+          <span className="text-xs">⌘</span>K
+        </kbd>
+        {searchFocused && (
+          <motion.div className="absolute -bottom-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#B9FF66]/50 to-transparent"
+            layoutId="search-glow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+        )}
       </div>
 
-      <div className="flex items-center gap-2 ml-auto">
+      <div className="flex items-center gap-1.5 ml-auto">
         {mounted && (
-          <Button variant="ghost" size="sm" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
+          <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="rounded-xl p-2 text-white/40 hover:text-white/70 hover:bg-white/5 transition-all">
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
         )}
         <div ref={notifRef} className="relative">
-          <Button variant="ghost" size="sm" onClick={toggleNotifications}>
-            <Bell className="h-5 w-5" />
+          <button onClick={toggleNotifications}
+            className="relative rounded-xl p-2 text-white/40 hover:text-white/70 hover:bg-white/5 transition-all">
+            <Bell className="h-4 w-4" />
             {unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+              <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#B9FF66] text-[8px] font-bold text-[#0A0A0A]">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
-          </Button>
-          {notifOpen && (
-            <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-[#D9D9D9] bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
-              <div className="flex items-center justify-between border-b border-[#D9D9D9] px-4 py-3 dark:border-gray-700">
-                <h3 className="text-sm font-semibold text-[#191A23] dark:text-white">Notifications</h3>
-                {unreadCount > 0 && (
-                  <button onClick={markAllRead} className="text-xs font-medium text-[#B9FF66] hover:text-[#A3F53D]">
-                    Mark all read
-                  </button>
-                )}
-              </div>
-              <div className="max-h-80 overflow-y-auto">
-                {notifications.length === 0 && (
-                  <p className="px-4 py-8 text-center text-sm text-[#666]">No notifications</p>
-                )}
-                {notifications.map((n) => (
-                  <Link key={n.id} href={n.link || "#"}
-                    onClick={() => setNotifOpen(false)}
-                    className={`block px-4 py-3 text-sm transition-colors hover:bg-[#F2FFD9] dark:hover:bg-gray-700 ${
-                      !n.read ? "border-l-2 border-[#B9FF66]" : ""
-                    }`}>
-                    <p className="font-medium text-[#191A23] dark:text-white">{n.message}</p>
-                    <p className="mt-0.5 text-xs text-[#999]">{formatDate(n.createdAt)}</p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+          </button>
+          <AnimatePresence>
+            {notifOpen && (
+              <motion.div initial={{ opacity: 0, y: 8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                transition={{ duration: 0.15 }}
+                className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-white/[0.06] bg-[#0A0A0A]/90 backdrop-blur-2xl shadow-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
+                  <h3 className="text-sm font-semibold text-white/80">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <button onClick={markAllRead} className="text-xs font-medium text-[#B9FF66] hover:text-[#A3F53D] transition-colors">
+                      Mark all read
+                    </button>
+                  )}
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {notifications.length === 0 && (
+                    <p className="px-4 py-8 text-center text-sm text-white/30">No notifications</p>
+                  )}
+                  {notifications.map((n) => (
+                    <Link key={n.id} href={n.link || "#"} onClick={() => setNotifOpen(false)}
+                      className={`block px-4 py-3 text-sm transition-colors hover:bg-white/[0.03] ${!n.read ? "border-l-2 border-[#B9FF66]" : ""}`}>
+                      <p className="font-medium text-white/70">{n.message}</p>
+                      <p className="mt-0.5 text-xs text-white/30">{formatDate(n.createdAt)}</p>
+                    </Link>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </header>
   );
 }
+
+

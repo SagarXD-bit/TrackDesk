@@ -9,11 +9,9 @@ export default async function DashboardPage() {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000);
 
-  const [
-    totalTickets, openTickets, readyForPickup, deliveredTickets,
+  const [totalTickets, openTickets, readyForPickup, deliveredTickets,
     cancelledTickets, todayTickets, activeCustomers, monthlyRevenue,
-    recentTickets, statusDistribution,
-  ] = await Promise.all([
+    recentTickets, statusDistribution] = await Promise.all([
     prisma.ticket.count(),
     prisma.ticket.count({ where: { status: { notIn: ["DELIVERED", "CANCELLED", "CLOSED"] } } }),
     prisma.ticket.count({ where: { status: "READY_FOR_PICKUP" } }),
@@ -21,14 +19,9 @@ export default async function DashboardPage() {
     prisma.ticket.count({ where: { status: "CANCELLED" } }),
     prisma.ticket.count({ where: { createdAt: { gte: startOfToday } } }),
     prisma.customer.count({ where: { tickets: { some: {} } } }),
-    prisma.ticket.aggregate({
-      where: { status: "CLOSED", closedDate: { gte: startOfMonth } },
-      _sum: { finalCost: true },
-    }),
-    prisma.ticket.findMany({
-      orderBy: { updatedAt: "desc" }, take: 10,
-      include: { customer: { select: { id: true, name: true, phone: true } }, assignedTo: { select: { id: true, name: true } } },
-    }),
+    prisma.ticket.aggregate({ where: { status: "CLOSED", closedDate: { gte: startOfMonth } }, _sum: { finalCost: true } }),
+    prisma.ticket.findMany({ orderBy: { updatedAt: "desc" }, take: 10,
+      include: { customer: { select: { id: true, name: true, phone: true } }, assignedTo: { select: { id: true, name: true } } } }),
     prisma.ticket.groupBy({ by: ["status"], _count: true }),
   ]);
 
@@ -43,18 +36,16 @@ export default async function DashboardPage() {
     })
   );
 
-  const stats = {
-    totalTickets, openTickets, readyForPickup, deliveredTickets, cancelledTickets,
+  const stats = { totalTickets, openTickets, readyForPickup, deliveredTickets, cancelledTickets,
     monthlyRevenue: monthlyRevenue._sum.finalCost || 0, todayTickets, activeCustomers,
     recentTickets: JSON.parse(JSON.stringify(recentTickets)),
-    statusDistribution: JSON.parse(JSON.stringify(statusDistribution)), weeklyData,
-  };
+    statusDistribution: JSON.parse(JSON.stringify(statusDistribution)), weeklyData };
 
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-white/90 tracking-tight">Dashboard</h1>
-        <p className="text-sm text-white/40">Real-time overview of your business</p>
+        <h1 className="text-xl font-semibold text-theme tracking-tight">Dashboard</h1>
+        <p className="text-sm text-muted">Real-time overview of your business</p>
       </div>
       <DashboardClient stats={stats} />
     </div>

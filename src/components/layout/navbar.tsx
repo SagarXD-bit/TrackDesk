@@ -10,12 +10,7 @@ import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
 
 interface Notification {
-  id: string;
-  type: string;
-  message: string;
-  link: string | null;
-  read: boolean;
-  createdAt: string;
+  id: string; type: string; message: string; link: string | null; read: boolean; createdAt: string;
 }
 
 export function Navbar() {
@@ -47,10 +42,7 @@ export function Navbar() {
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        searchRef.current?.focus();
-      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); searchRef.current?.focus(); }
     }
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
@@ -72,26 +64,22 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 px-4 border-b border-white/[0.04] bg-[#050505]/80 backdrop-blur-2xl">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 px-4 border-b border-theme bg-theme/80 backdrop-blur-2xl">
       <button onClick={openMobile}
-        className="flex lg:hidden rounded-xl p-2 text-white/40 hover:text-white/70 hover:bg-white/5 transition-all">
+        className="flex lg:hidden rounded-xl p-2 text-muted hover:text-secondary hover:bg-hover transition-all">
         <Menu className="h-5 w-5" />
       </button>
 
-      <div className={cn(
-        "relative flex-1 max-w-md transition-all duration-300",
-        searchFocused ? "scale-[1.02]" : "scale-100"
-      )}>
-        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+      <div className={cn("relative flex-1 max-w-md transition-all duration-300", searchFocused ? "scale-[1.02]" : "scale-100")}>
+        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
         <input ref={searchRef} type="text" placeholder="Search..."
-          onFocus={() => setSearchFocused(true)}
-          onBlur={() => setSearchFocused(false)}
+          onFocus={() => setSearchFocused(true)} onBlur={() => setSearchFocused(false)}
           className={cn(
-            "w-full rounded-2xl py-2 pl-10 pr-14 text-sm text-white/70 placeholder:text-white/20 transition-all duration-300 outline-none",
-            "bg-white/[0.04] border border-white/[0.06]",
-            "focus:bg-white/[0.06] focus:border-white/[0.12] focus:text-white",
+            "w-full rounded-2xl py-2 pl-10 pr-14 text-sm text-theme placeholder:text-muted/50 transition-all duration-300 outline-none",
+            "bg-search border border-theme",
+            "focus:bg-hover focus:border-[var(--search-focus)]",
           )} />
-        <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 rounded-lg bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-medium text-white/30">
+        <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 rounded-lg bg-hover px-1.5 py-0.5 text-[10px] font-medium text-muted">
           <span className="text-xs">⌘</span>K
         </kbd>
         {searchFocused && (
@@ -103,13 +91,13 @@ export function Navbar() {
       <div className="flex items-center gap-1.5 ml-auto">
         {mounted && (
           <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-xl p-2 text-white/40 hover:text-white/70 hover:bg-white/5 transition-all">
+            className="rounded-xl p-2 text-muted hover:text-secondary hover:bg-hover transition-all">
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
         )}
         <div ref={notifRef} className="relative">
           <button onClick={toggleNotifications}
-            className="relative rounded-xl p-2 text-white/40 hover:text-white/70 hover:bg-white/5 transition-all">
+            className="relative rounded-xl p-2 text-muted hover:text-secondary hover:bg-hover transition-all">
             <Bell className="h-4 w-4" />
             {unreadCount > 0 && (
               <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#B9FF66] text-[8px] font-bold text-[#0A0A0A]">
@@ -121,9 +109,9 @@ export function Navbar() {
             {notifOpen && (
               <motion.div initial={{ opacity: 0, y: 8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-white/[0.06] bg-[#0A0A0A]/90 backdrop-blur-2xl shadow-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
-                  <h3 className="text-sm font-semibold text-white/80">Notifications</h3>
+                className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-theme bg-card-glass shadow-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-theme">
+                  <h3 className="text-sm font-semibold text-theme">Notifications</h3>
                   {unreadCount > 0 && (
                     <button onClick={markAllRead} className="text-xs font-medium text-[#B9FF66] hover:text-[#A3F53D] transition-colors">
                       Mark all read
@@ -131,14 +119,12 @@ export function Navbar() {
                   )}
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  {notifications.length === 0 && (
-                    <p className="px-4 py-8 text-center text-sm text-white/30">No notifications</p>
-                  )}
+                  {notifications.length === 0 && <p className="px-4 py-8 text-center text-sm text-muted">No notifications</p>}
                   {notifications.map((n) => (
                     <Link key={n.id} href={n.link || "#"} onClick={() => setNotifOpen(false)}
-                      className={`block px-4 py-3 text-sm transition-colors hover:bg-white/[0.03] ${!n.read ? "border-l-2 border-[#B9FF66]" : ""}`}>
-                      <p className="font-medium text-white/70">{n.message}</p>
-                      <p className="mt-0.5 text-xs text-white/30">{formatDate(n.createdAt)}</p>
+                      className={`block px-4 py-3 text-sm transition-colors hover:bg-hover ${!n.read ? "border-l-2 border-[#B9FF66]" : ""}`}>
+                      <p className="font-medium text-theme">{n.message}</p>
+                      <p className="mt-0.5 text-xs text-muted">{formatDate(n.createdAt)}</p>
                     </Link>
                   ))}
                 </div>
@@ -150,5 +136,3 @@ export function Navbar() {
     </header>
   );
 }
-
-

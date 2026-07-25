@@ -18,10 +18,10 @@ export function Logo({ collapsed = false }: { collapsed?: boolean }) {
           <ClipboardCheck className="h-5 w-5 text-[#0A0A0A]" />
         </div>
         <div className="flex flex-col">
-          <span className="text-base font-bold leading-tight text-white tracking-tight">
+          <span className="text-base font-bold leading-tight text-sidebar tracking-tight">
             Track Desk
           </span>
-          <span className="text-[11px] font-normal text-white/40 leading-tight">
+          <span className="text-[11px] font-normal text-sidebar-muted leading-tight">
             Ticket Management
           </span>
         </div>

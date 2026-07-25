@@ -10,10 +10,13 @@
 
 :root {
   --bg: #F5F5F5;
-  --text-primary: #0A0A0A;
+  --text-primary: #1A1A1A;
   --text-secondary: #555;
   --text-muted: #888;
   --sidebar-bg: #FFFFFF;
+  --sidebar-text: #1A1A1A;
+  --sidebar-text-muted: #666;
+  --sidebar-hover: rgba(0,0,0,0.04);
   --card-bg: #FFFFFF;
   --card-hover: #FAFAFA;
   --border: rgba(0,0,0,0.07);
@@ -28,6 +31,9 @@
   --text-secondary: rgba(255,255,255,0.6);
   --text-muted: rgba(255,255,255,0.38);
   --sidebar-bg: #0B0B0B;
+  --sidebar-text: #FFF;
+  --sidebar-text-muted: #B8B8B8;
+  --sidebar-hover: rgba(255,255,255,0.06);
   --card-bg: #131313;
   --card-hover: #181818;
   --border: rgba(255,255,255,0.06);
@@ -61,6 +67,9 @@ body {
 .text-theme { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }
 .text-muted { color: var(--text-muted); }
+.text-sidebar { color: var(--sidebar-text); }
+.text-sidebar-muted { color: var(--sidebar-text-muted); }
+.bg-sidebar-hover { background: var(--sidebar-hover); }
 .border-theme { border-color: var(--border); }
 
 .card {

@@ -27,22 +27,22 @@ const NavItem = memo(function NavItem({ href, label, icon: Icon, collapsed }: { 
       className={cn(
         "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150",
         collapsed ? "justify-center px-0" : "px-3",
-        isActive ? "text-white" : "text-[#B8B8B8] hover:text-white",
+        isActive ? "text-[#0A0A0A]" : "text-sidebar-muted hover:text-sidebar",
       )}>
       {isActive && (
         <motion.div layoutId="pill"
-          className="absolute inset-0 rounded-xl bg-white/[0.06] pointer-events-none"
+          className="absolute inset-0 rounded-xl bg-[#B9FF66] pointer-events-none"
           transition={{ type: "spring", stiffness: 500, damping: 40 }} />
       )}
       {isActive && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[#B9FF66] pointer-events-none" />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full bg-[#191A23] pointer-events-none" />
       )}
       {!isActive && (
-        <div className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-150 bg-white/[0.04] pointer-events-none" />
+        <div className="absolute inset-0 rounded-xl opacity-0 hover:opacity-100 transition-opacity duration-150 bg-sidebar-hover pointer-events-none" />
       )}
       <Icon className={cn(
         "h-5 w-5 shrink-0 transition-colors duration-150 relative z-10",
-        isActive ? "text-[#B9FF66]" : "text-[#B8B8B8] group-hover:text-white",
+        isActive ? "text-[#191A23]" : "text-sidebar-muted group-hover:text-sidebar",
       )} />
       {!collapsed && <span className="relative z-10">{label}</span>}
     </Link>
@@ -64,7 +64,7 @@ export function Sidebar() {
             <>
               <Logo />
               <button onClick={toggleCollapsed} className="ml-auto flex items-center justify-center rounded-lg w-7 h-7 text-muted hover:text-secondary hover:bg-hover transition-colors duration-150">
-                <ChevronLeft className={cn("h-4 w-4 transition-transform duration-200", collapsed && "rotate-180")} />
+                <ChevronLeft className={cn("h-4 w-4 transition-transform duration-200")} />
               </button>
             </>
           )}
@@ -75,8 +75,8 @@ export function Sidebar() {
         </nav>
         <div className="shrink-0 border-t border-theme p-3">
           <Link href="/login" className={cn("flex items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-150 group", collapsed ? "justify-center py-2.5" : "px-3 py-2.5")}>
-            <LogIn className="h-5 w-5 shrink-0 text-[#B8B8B8] group-hover:text-white transition-colors duration-150" />
-            {!collapsed && <><span className="text-[#B8B8B8] group-hover:text-white transition-colors duration-150">Sign In</span><span className="ml-auto text-[10px] text-muted">⌘I</span></>}
+            <LogIn className="h-5 w-5 shrink-0 text-sidebar-muted group-hover:text-sidebar transition-colors duration-150" />
+            {!collapsed && <><span className="text-sidebar-muted group-hover:text-sidebar transition-colors duration-150">Sign In</span><span className="ml-auto text-[10px] text-muted">⌘I</span></>}
           </Link>
         </div>
       </aside>
@@ -98,8 +98,8 @@ export function Sidebar() {
               </nav>
               <div className="shrink-0 border-t border-theme p-3">
                 <Link href="/login" className={cn("flex items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-150 group", collapsed ? "justify-center py-2.5" : "px-3 py-2.5")}>
-                  <LogIn className="h-5 w-5 shrink-0 text-[#B8B8B8] group-hover:text-white transition-colors duration-150" />
-                  {!collapsed && <span className="text-[#B8B8B8] group-hover:text-white transition-colors duration-150">Sign In</span>}
+                  <LogIn className="h-5 w-5 shrink-0 text-sidebar-muted group-hover:text-sidebar transition-colors duration-150" />
+                  {!collapsed && <span className="text-sidebar-muted group-hover:text-sidebar transition-colors duration-150">Sign In</span>}
                 </Link>
               </div>
             </motion.div>

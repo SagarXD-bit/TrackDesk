@@ -19,8 +19,6 @@
   --border: rgba(0,0,0,0.07);
   --hover-bg: rgba(0,0,0,0.03);
   --search-bg: rgba(0,0,0,0.04);
-  --search-border: rgba(0,0,0,0.08);
-  --search-focus: rgba(0,0,0,0.12);
   --scrollbar: rgba(0,0,0,0.08);
 }
 
@@ -35,8 +33,6 @@
   --border: rgba(255,255,255,0.06);
   --hover-bg: rgba(255,255,255,0.03);
   --search-bg: rgba(255,255,255,0.04);
-  --search-border: rgba(255,255,255,0.06);
-  --search-focus: rgba(255,255,255,0.15);
   --scrollbar: rgba(255,255,255,0.06);
 }
 
@@ -57,43 +53,21 @@ body {
   outline-offset: 2px;
 }
 
-/* Theme utilities */
 .bg-theme { background: var(--bg); }
 .bg-sidebar { background: var(--sidebar-bg); }
 .bg-card { background: var(--card-bg); }
 .bg-hover { background: var(--hover-bg); }
 .bg-search { background: var(--search-bg); }
-
 .text-theme { color: var(--text-primary); }
 .text-secondary { color: var(--text-secondary); }
 .text-muted { color: var(--text-muted); }
-
 .border-theme { border-color: var(--border); }
 
-/* Card style — solid, no glass */
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 16px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.02);
 }
-
-/* Aurora background — minimal */
-@keyframes aurora {
-  0%, 100% { opacity: 0.15; transform: translate(0, 0) scale(1); }
-  25% { opacity: 0.2; transform: translate(60px, -30px) scale(1.05); }
-  50% { opacity: 0.1; transform: translate(-30px, 60px) scale(0.95); }
-  75% { opacity: 0.18; transform: translate(30px, 30px) scale(1.02); }
-}
-.aurora-blob {
-  position: fixed; border-radius: 50%; filter: blur(80px);
-  pointer-events: none; animation: aurora 25s ease-in-out infinite;
-}
-.dark .aurora-1 { background: radial-gradient(circle, rgba(185,255,102,0.06) 0%, transparent 70%); }
-.dark .aurora-2 { background: radial-gradient(circle, rgba(6,182,212,0.04) 0%, transparent 70%); }
-.dark .aurora-3 { background: radial-gradient(circle, rgba(168,85,247,0.03) 0%, transparent 70%); }
-:root .aurora-1 { background: radial-gradient(circle, rgba(185,255,102,0.03) 0%, transparent 70%); }
-:root .aurora-2 { background: radial-gradient(circle, rgba(6,182,212,0.02) 0%, transparent 70%); }
-:root .aurora-3 { background: radial-gradient(circle, rgba(168,85,247,0.02) 0%, transparent 70%); }
 
 @media print { .no-print { display: none !important; } }

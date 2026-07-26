@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard, Ticket, Users, Package, UserCog, BarChart3, PieChart, Settings, LogIn, ChevronLeft, X,
+  LayoutDashboard, Ticket, Users, Settings, LogIn, ChevronLeft, X,
 } from "lucide-react";
 import { useEffect, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,22 +12,15 @@ import { Logo } from "./logo";
 import { useSidebar } from "./sidebar-context";
 
 const mainNav = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/tickets", label: "Tickets", icon: Ticket },
   { href: "/customers", label: "Customers", icon: Users },
-  { href: "/inventory", label: "Inventory", icon: Package },
-];
-
-const secondaryNav = [
-  { href: "/employees", label: "Employees", icon: UserCog },
-  { href: "/reports", label: "Reports", icon: BarChart3 },
-  { href: "/analytics", label: "Analytics", icon: PieChart },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-const NavItem = memo(function NavItem({ href, label, icon: Icon, collapsed }: { href: string; label: string; icon: typeof LayoutDashboard; collapsed: boolean }) {
+const NavItem = memo(function NavItem({ href, label, icon: Icon, collapsed, exact }: { href: string; label: string; icon: typeof LayoutDashboard; collapsed: boolean; exact?: boolean }) {
   const pathname = usePathname();
-  const isActive = pathname.startsWith(href);
+  const isActive = exact ? pathname === href : pathname.startsWith(href);
 
   return (
     <Link href={href}
@@ -75,15 +68,8 @@ export function Sidebar() {
           </>
         )}
       </div>
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
-        <div>
-          {!collapsed && <div className="px-3 pb-1.5"><span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-sidebar-muted/60">Main</span></div>}
-          <div className="space-y-0.5">{mainNav.map((item) => <NavItem key={item.href} {...item} collapsed={collapsed} />)}</div>
-        </div>
-        <div>
-          {!collapsed && <div className="px-3 pb-1.5"><span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-sidebar-muted/60">Management</span></div>}
-          <div className="space-y-0.5">{secondaryNav.map((item) => <NavItem key={item.href} {...item} collapsed={collapsed} />)}</div>
-        </div>
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5">
+        {mainNav.map((item) => <NavItem key={item.href} {...item} collapsed={collapsed} />)}
       </nav>
       <div className="shrink-0 border-t border-theme p-3">
         <Link href="/login" className={cn("flex items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-100 group", collapsed ? "justify-center py-2.5" : "px-3 py-2.5")}>

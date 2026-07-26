@@ -2,7 +2,7 @@
 
 A modern, premium ticket and order management platform with a black, white, and neon-lime design.
 
-> **Live Demo**: [https://trackdesk.vercel.app](https://trackdesk.vercel.app) <!-- Replace with your actual Vercel URL -->
+> **Live Demo**: [https://trackdesk.vercel.app]([https://trackdesk.vercel.app](https://track-desk-chi.vercel.app/)) <!-- Replace with your actual Vercel URL -->
 
 ![Track Desk](public/og.png)
 

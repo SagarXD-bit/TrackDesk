@@ -64,7 +64,7 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 px-4 border-b border-theme bg-theme/80 backdrop-blur-2xl">
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-3 px-4 border-b border-theme bg-theme">
       <button onClick={openMobile}
         className="flex lg:hidden rounded-xl p-2 text-muted hover:text-secondary hover:bg-hover transition-all">
         <Menu className="h-5 w-5" />
@@ -109,7 +109,7 @@ export function Navbar() {
             {notifOpen && (
               <motion.div initial={{ opacity: 0, y: 8, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 8, scale: 0.96 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-theme bg-card-glass shadow-2xl overflow-hidden">
+                className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-theme bg-card shadow-lg overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-theme">
                   <h3 className="text-sm font-semibold text-theme">Notifications</h3>
                   {unreadCount > 0 && (

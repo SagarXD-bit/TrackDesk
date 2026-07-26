@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import {
@@ -66,10 +66,79 @@ function KpiCard({ label, value, accentKey }: { label: string; value: number; ac
 
 const tooltipStyle = { borderRadius: 12, border: "1px solid var(--border)", background: "var(--card-bg)", color: "var(--text-primary)", fontSize: 13 };
 
+function DonutChart({ data, total }: { data: { name: string; value: number; color: string }[]; total: number }) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  const onMouseEnter = useCallback((_: any, index: number) => setActiveIndex(index), []);
+  const onMouseLeave = useCallback(() => setActiveIndex(null), []);
+
+  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+    if (percent < 0.03) return null;
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + 18;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    return (
+      <text x={x} y={y} fill="var(--text-primary)" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central"
+        fontSize={11} fontWeight={600} style={{ pointerEvents: "none" }}>
+        {(percent * 100).toFixed(0)}%
+      </text>
+    );
+  };
+
+  const activeItem = activeIndex !== null ? data[activeIndex] : null;
+
+  return (
+    <div className="flex flex-col md:flex-row items-center gap-6">
+      <div className="relative shrink-0" style={{ width: 240, height: 240 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} cx="50%" cy="50%" innerRadius={62} outerRadius={activeIndex !== null ? 98 : 90}
+              dataKey="value" paddingAngle={3}
+              onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}
+              label={renderCustomLabel} labelLine={false}
+              animationDuration={250} animationBegin={200}>
+              {data.map((entry, i) => (
+                <Cell key={i} fill={entry.color}
+                  stroke={activeIndex === i ? "var(--text-primary)" : "transparent"}
+                  strokeWidth={activeIndex === i ? 2 : 0}
+                  style={{ transition: "all 0.2s ease", cursor: "pointer" }} />
+              ))}
+            </Pie>
+            <Tooltip contentStyle={tooltipStyle}
+              formatter={(value: any) => [`${value} (${((value / total) * 100).toFixed(1)}%)`, "Tickets"]} />
+          </PieChart>
+        </ResponsiveContainer>
+        {/* Center total */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <span className="text-2xl font-bold text-theme">{total}</span>
+          <span className="text-[11px] font-medium text-muted leading-tight">Total Tickets</span>
+        </div>
+      </div>
+      {/* Legend */}
+      <div className="flex-1 w-full space-y-1.5 min-w-0">
+        {data.map((entry, i) => {
+          const pct = ((entry.value / total) * 100).toFixed(1);
+          return (
+            <div key={i}
+              className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-colors duration-200 cursor-default ${activeIndex === i ? "bg-hover" : ""}`}
+              onMouseEnter={() => setActiveIndex(i)} onMouseLeave={() => setActiveIndex(null)}>
+              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: entry.color }} />
+              <span className="flex-1 text-sm text-theme font-medium truncate">{entry.name}</span>
+              <span className="text-sm font-semibold text-theme tabular-nums">{entry.value}</span>
+              <span className="text-xs text-muted tabular-nums w-12 text-right">({pct}%)</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function DashboardClient({ stats }: { stats: any }) {
   const pieData = (stats.statusDistribution || []).map((s: any) => ({
     name: statusLabels[s.status] || s.status, value: s._count, color: statusColors[s.status] || "#6B7280",
-  }));
+  })).filter((d: { value: number }) => d.value > 0);
   const spark = stats.monthlyRevenue > 0 ? [2, 4, 6, 5, 8, 7, 10, 9, 11, 10, 12, Math.floor(stats.monthlyRevenue / 100)] : [1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7];
 
   const variants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
@@ -138,17 +207,8 @@ export function DashboardClient({ stats }: { stats: any }) {
         </motion.div>
 
         <motion.div variants={fadeUp} className="lg:col-span-2 card p-5">
-          <h3 className="mb-4 text-xs font-semibold text-muted uppercase tracking-wider">Status</h3>
-          <div className="h-52">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={76} dataKey="value" paddingAngle={2}>
-                  {pieData.map((e: any, i: number) => <Cell key={i} fill={e.color} />)}
-                </Pie>
-                <Tooltip contentStyle={tooltipStyle} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <h3 className="mb-4 text-xs font-semibold text-muted uppercase tracking-wider">Status Distribution</h3>
+          <DonutChart data={pieData} total={stats.totalTickets} />
         </motion.div>
       </div>
 
